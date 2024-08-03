@@ -144,3 +144,25 @@ async def delete_item(item_id: int) -> dict:
         session.commit()
 
     return dict(message="delete success")
+
+
+@app.post("/wallets")
+async def create_wallet(wallet: BaseWallet) -> BaseWallet:
+    print("create_wallet", wallet)
+    data = wallet.dict()
+    dbwallet = DBWallet(**data)
+    with Session(engine) as session:
+        session.add(dbwallet)
+        session.commit()
+        session.refresh(dbwallet)
+
+    return BaseWallet.from_orm(dbwallet)
+
+
+@app.get("/wallets/{wallet_id}")
+async def read_wallet(wallet_id: int) -> BaseWallet:
+    with Session(engine) as session:
+        db_wallet = session.get(DBWallet, wallet_id)
+        if db_wallet:
+            return BaseWallet.from_orm(db_wallet)
+    raise HTTPException(status_code=404, detail="Wallet not found")
