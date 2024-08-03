@@ -166,3 +166,48 @@ async def read_wallet(wallet_id: int) -> BaseWallet:
         if db_wallet:
             return BaseWallet.from_orm(db_wallet)
     raise HTTPException(status_code=404, detail="Wallet not found")
+
+
+@app.post("/merchant/")
+async def create_merchant(merchant: BaseMerchant) -> BaseMerchant:
+    print("create_merchant", merchant)
+    data = merchant.dict()
+    dbmerchant = DBMerchant(**data)
+    with Session(engine) as session:
+        session.add(dbmerchant)
+        session.commit()
+        session.refresh(dbmerchant)
+
+    return BaseMerchant.from_orm(dbmerchant)
+
+
+@app.get("/merchant/{merchant_id}")
+async def read_merchant(merchant_id: int) -> BaseMerchant:
+    with Session(engine) as session:
+        db_merchant = session.get(DBMerchant, merchant_id)
+        if db_merchant:
+            return BaseMerchant.from_orm(db_merchant)
+    raise HTTPException(status_code=404, detail="Merchant not found")
+
+
+@app.post("/transaction/")
+async def create_transaction(transaction: BaseTransaction) -> BaseTransaction:
+    print("create_transaction", transaction)
+    data = transaction.dict()
+    dbtransaction = DBTransaction(**data)
+    with Session(engine) as session:
+        session.add(dbtransaction)
+        session.commit()
+        session.refresh(dbtransaction)
+
+    return BaseTransaction.from_orm(dbtransaction)
+
+
+@app.get("/transaction/{transaction_id}")
+async def read_transaction(transaction_id: int) -> BaseTransaction:
+    with Session(engine) as session:
+        db_transaction = session.get(DBTransaction, transaction_id)
+        if db_transaction:
+            return BaseTransaction.from_orm(db_transaction)
+    raise HTTPException(status_code=404, detail="Transaction not found")
+
