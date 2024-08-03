@@ -5,6 +5,12 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import Field, SQLModel, create_engine, Session, select
 
+class BaseWallet(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    balance: float
+    
+
 
 class BaseItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -13,6 +19,19 @@ class BaseItem(BaseModel):
     description: str | None = None
     price: float = 0.12
     tax: float | None = None
+
+
+class BaseMerchant(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    name: str
+
+class BaseTransaction(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    user_id: int
+    amount: float
+    merchant_id: int
 
 
 class CreatedItem(BaseItem):
@@ -26,11 +45,19 @@ class UpdatedItem(BaseItem):
 class Item(BaseItem):
     id: int
 
+class DBWallet(BaseWallet, SQLModel,table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
 
 class DBItem(Item, SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
 
+class DBMerchant(BaseMerchant, SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
 
+
+class DBTransaction(BaseTransaction, SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
 class ItemList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     items: list[Item]
